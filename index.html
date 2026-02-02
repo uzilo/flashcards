@@ -446,7 +446,7 @@
 
             <div class="control-group">
                 <label for="cardCount">Number of Cards:</label>
-                <input type="number" id="cardCount" min="1" value="10">
+                <input type="number" id="cardCount" min="1" max="12" value="5">
             </div>
 
             <div class="button-group">
@@ -637,7 +637,19 @@
 
         // Update Card Count Max
         function updateCardCountMax() {
-            cardCountInput.max = vocabData.length;
+            const selectedUnit = unitSelect.value;
+            let availableCards = vocabData;
+            
+            if (selectedUnit !== 'all') {
+                availableCards = vocabData.filter(item => item.unit === selectedUnit);
+            }
+            
+            cardCountInput.max = availableCards.length;
+            
+            // Adjust current value if it exceeds max
+            if (parseInt(cardCountInput.value) > availableCards.length) {
+                cardCountInput.value = availableCards.length;
+            }
         }
 
         // Event Listeners
@@ -654,6 +666,7 @@
             easyBtn.addEventListener('click', markAsEasy);
             prevBtn.addEventListener('click', previousCard);
             nextBtn.addEventListener('click', nextCard);
+            unitSelect.addEventListener('change', updateCardCountMax);
 
             // Keyboard navigation
             document.addEventListener('keydown', handleKeyPress);
@@ -666,13 +679,13 @@
             if (mode === 'hard') {
                 filteredData = vocabData.filter(item => hardWords.includes(item.id));
                 if (filteredData.length === 0) {
-                    alert('No hard words saved yet!');
+                    showNotification('No hard words saved yet!');
                     return;
                 }
             } else if (mode === 'favorites') {
                 filteredData = vocabData.filter(item => favorites.includes(item.id));
                 if (filteredData.length === 0) {
-                    alert('No favorites saved yet!');
+                    showNotification('No favorites saved yet!');
                     return;
                 }
             } else {
@@ -684,11 +697,11 @@
 
             // Shuffle and limit
             filteredData = shuffleArray(filteredData);
-            const cardCount = Math.min(parseInt(cardCountInput.value), filteredData.length);
+            const cardCount = Math.max(1, Math.min(parseInt(cardCountInput.value) || 5, filteredData.length));
             currentCards = filteredData.slice(0, cardCount);
 
             if (currentCards.length === 0) {
-                alert('No cards available for the selected filters!');
+                showNotification('No cards available for the selected filters!');
                 return;
             }
 
@@ -762,12 +775,21 @@
         function pronounceWord() {
             const card = currentCards[currentIndex];
             if ('speechSynthesis' in window) {
+                // Cancel any ongoing speech
+                speechSynthesis.cancel();
+                
                 const utterance = new SpeechSynthesisUtterance(card.word);
                 utterance.lang = 'en-US';
                 utterance.rate = 0.9;
-                speechSynthesis.speak(utterance);
-            } else {
-                alert('Speech synthesis not supported in your browser');
+                
+                // Ensure voices are loaded
+                if (speechSynthesis.getVoices().length === 0) {
+                    speechSynthesis.addEventListener('voiceschanged', () => {
+                        speechSynthesis.speak(utterance);
+                    }, { once: true });
+                } else {
+                    speechSynthesis.speak(utterance);
+                }
             }
         }
 
@@ -807,7 +829,7 @@
                 showCard();
             } else {
                 // Session complete
-                alert('🎉 Great job! You\'ve completed this session!');
+                showNotification('🎉 Great job! You\'ve completed this session!');
                 goToDashboard();
             }
         }
@@ -849,8 +871,40 @@
                 favorites = [];
                 localStorage.removeItem('hardWords');
                 localStorage.removeItem('favorites');
-                alert('Progress has been reset!');
+                showNotification('Progress has been reset!');
             }
+        }
+
+        // Show Notification
+        function showNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(102, 126, 234, 0.95);
+                color: white;
+                padding: 15px 30px;
+                border-radius: 10px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+                backdrop-filter: blur(10px);
+                z-index: 1000;
+                font-weight: 500;
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'fadeIn 0.3s ease reverse';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
         }
 
         // Initialize app
