@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcard Web App - English Collocations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        /* Dashboard Styles */
+        .dashboard {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .dashboard h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .dashboard .subtitle {
+            color: #a0a0a0;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #e0e0e0;
+            font-size: 1rem;
+        }
+
+        select, input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #e0e0e0;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            grid-column: span 2;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: rgba(220, 53, 69, 0.2);
+            color: #ff6b6b;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            grid-column: span 2;
+            margin-top: 10px;
+        }
+
+        .btn-danger:hover {
+            background: rgba(220, 53, 69, 0.3);
+        }
+
+        /* Learning Mode Styles */
+        .learning-mode {
+            display: none;
+        }
+
+        .learning-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .home-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #e0e0e0;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .home-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .progress-info {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .progress-bar-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 8px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* 3D Flip Card */
+        .card-container {
+            perspective: 1000px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .card-front {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .card-back {
+            background: rgba(102, 126, 234, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            transform: rotateY(180deg);
+        }
+
+        .card-word {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .card-meaning {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .card-example {
+            font-size: 1.2rem;
+            color: #e0e0e0;
+            font-style: italic;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .card-unit {
+            font-size: 1rem;
+            color: #a0a0a0;
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+
+        /* Controls */
+        .card-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .control-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Rating Buttons */
+        .rating-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .rating-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .rating-btn.hard {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 2px solid rgba(239, 68, 68, 0.5);
+        }
+
+        .rating-btn.hard:hover {
+            background: rgba(239, 68, 68, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .rating-btn.easy {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 2px solid rgba(34, 197, 94, 0.5);
+        }
+
+        .rating-btn.easy:hover {
+            background: rgba(34, 197, 94, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Navigation */
+        .navigation {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .nav-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard {
+                padding: 25px;
+            }
+
+            .dashboard h1 {
+                font-size: 2rem;
+            }
+
+            .card-word {
+                font-size: 2rem;
+            }
+
+            .card-meaning {
+                font-size: 1.4rem;
+            }
+
+            .card-example {
+                font-size: 1rem;
+            }
+
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-primary {
+                grid-column: span 1;
+            }
+
+            .rating-buttons {
+                flex-direction: column;
+            }
+
+            .card {
+                height: 450px;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dashboard, .learning-mode {
+            animation: fadeIn 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Dashboard Screen -->
+        <div id="dashboard" class="dashboard">
+            <h1>📚 Flashcard App</h1>
+            <p class="subtitle">Master English Collocations</p>
+
+            <div class="control-group">
+                <label for="unitSelect">Select Unit:</label>
+                <select id="unitSelect">
+                    <option value="all">All Units</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="cardCount">Number of Cards:</label>
+                <input type="number" id="cardCount" min="1" max="12" value="5">
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" id="reviewHardBtn">🔴 Review Hard Words</button>
+                <button class="btn btn-secondary" id="reviewFavoritesBtn">❤️ Review Favorites</button>
+                <button class="btn btn-primary" id="startBtn">Start Learning</button>
+                <button class="btn btn-danger" id="resetBtn">🗑️ Reset Progress</button>
+            </div>
+        </div>
+
+        <!-- Learning Mode Screen -->
+        <div id="learningMode" class="learning-mode">
+            <div class="learning-header">
+                <button class="home-btn" id="homeBtn">← Back to Dashboard</button>
+                <div class="progress-info" id="progressInfo">1/10</div>
+            </div>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <div class="card-container">
+                <div class="card" id="flashcard">
+                    <div class="card-face card-front">
+                        <div class="card-word" id="cardWord">Loading...</div>
+                    </div>
+                    <div class="card-face card-back">
+                        <div class="card-meaning" id="cardMeaning">Meaning</div>
+                        <div class="card-example" id="cardExample">Example sentence</div>
+                        <div class="card-unit" id="cardUnit">Unit</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-controls">
+                <button class="control-btn" id="favoriteBtn" title="Add to Favorites">❤️</button>
+                <button class="control-btn" id="soundBtn" title="Pronounce">🔊</button>
+            </div>
+
+            <div class="rating-buttons">
+                <button class="rating-btn hard" id="hardBtn">🔴 Hard / Again</button>
+                <button class="rating-btn easy" id="easyBtn">🟢 Good / Easy</button>
+            </div>
+
+            <div class="navigation">
+                <button class="nav-btn" id="prevBtn">← Previous</button>
+                <button class="nav-btn" id="nextBtn">Next →</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Vocabulary Data
+        const vocabData = [
+            {
+                "id": 1,
+                "unit": "Unit 4: Types of Collocation",
+                "word": "major problem",
+                "meaning": "vấn đề lớn/nghiêm trọng",
+                "example": "Unemployment remains a major problem in developing countries."
+            },
+            {
+                "id": 2,
+                "unit": "Unit 4: Types of Collocation",
+                "word": "key issue",
+                "meaning": "vấn đề then chốt",
+                "example": "Climate change is a key issue that governments must address."
+            },
+            {
+                "id": 3,
+                "unit": "Unit 5: Register",
+                "word": "bored stiff",
+                "meaning": "chán phát ngấy (Informal)",
+                "example": "I was bored stiff during the three-hour lecture."
+            },
+            {
+                "id": 4,
+                "unit": "Unit 5: Register",
+                "word": "axe jobs",
+                "meaning": "cắt giảm việc làm (Newspaper headline)",
+                "example": "Tech giant to axe 5,000 jobs amid downturn."
+            },
+            {
+                "id": 5,
+                "unit": "Unit 6: Intensifying Adverbs",
+                "word": "highly controversial",
+                "meaning": "gây tranh cãi nhiều",
+                "example": "The new policy is highly controversial."
+            },
+            {
+                "id": 6,
+                "unit": "Unit 6: Intensifying Adverbs",
+                "word": "bitterly disappointed",
+                "meaning": "thất vọng ê chề",
+                "example": "Many graduates are bitterly disappointed by the job market."
+            },
+            {
+                "id": 7,
+                "unit": "Unit 7: Make & Do",
+                "word": "make a breakthrough",
+                "meaning": "đạt được bước đột phá",
+                "example": "Scientists made a breakthrough in cancer research."
+            },
+            {
+                "id": 8,
+                "unit": "Unit 13: Weather",
+                "word": "torrential rain",
+                "meaning": "mưa như trút nước",
+                "example": "Torrential rain caused flooding in many areas."
+            },
+            {
+                "id": 9,
+                "unit": "Unit 13: Weather",
+                "word": "scorching hot",
+                "meaning": "nóng như thiêu đốt",
+                "example": "It's scorching hot in the middle of the day during summer."
+            },
+            {
+                "id": 10,
+                "unit": "Unit 52: Success & Failure",
+                "word": "fail miserably",
+                "meaning": "thất bại thảm hại",
+                "example": "The policy failed miserably to reduce unemployment."
+            },
+            {
+                "id": 11,
+                "unit": "Unit 52: Success & Failure",
+                "word": "recipe for disaster",
+                "meaning": "công thức dẫn đến thảm họa",
+                "example": "Ignoring safety rules is a recipe for disaster."
+            },
+            {
+                "id": 12,
+                "unit": "Unit 45: Taste & Smell",
+                "word": "acquired taste",
+                "meaning": "vị cần thời gian để quen",
+                "example": "Durian is an acquired taste that many tourists struggle with."
+            }
+        ];
+
+        // State Management
+        let currentCards = [];
+        let currentIndex = 0;
+        let hardWords = JSON.parse(localStorage.getItem('hardWords') || '[]');
+        let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+
+        // DOM Elements
+        const dashboard = document.getElementById('dashboard');
+        const learningMode = document.getElementById('learningMode');
+        const unitSelect = document.getElementById('unitSelect');
+        const cardCountInput = document.getElementById('cardCount');
+        const startBtn = document.getElementById('startBtn');
+        const reviewHardBtn = document.getElementById('reviewHardBtn');
+        const reviewFavoritesBtn = document.getElementById('reviewFavoritesBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const homeBtn = document.getElementById('homeBtn');
+        const flashcard = document.getElementById('flashcard');
+        const cardWord = document.getElementById('cardWord');
+        const cardMeaning = document.getElementById('cardMeaning');
+        const cardExample = document.getElementById('cardExample');
+        const cardUnit = document.getElementById('cardUnit');
+        const progressInfo = document.getElementById('progressInfo');
+        const progressBar = document.getElementById('progressBar');
+        const favoriteBtn = document.getElementById('favoriteBtn');
+        const soundBtn = document.getElementById('soundBtn');
+        const hardBtn = document.getElementById('hardBtn');
+        const easyBtn = document.getElementById('easyBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        // Initialize
+        function init() {
+            populateUnitSelect();
+            updateCardCountMax();
+            attachEventListeners();
+        }
+
+        // Populate Unit Select
+        function populateUnitSelect() {
+            const units = [...new Set(vocabData.map(item => item.unit))];
+            units.forEach(unit => {
+                const option = document.createElement('option');
+                option.value = unit;
+                option.textContent = unit;
+                unitSelect.appendChild(option);
+            });
+        }
+
+        // Update Card Count Max
+        function updateCardCountMax() {
+            const selectedUnit = unitSelect.value;
+            let availableCards = vocabData;
+            
+            if (selectedUnit !== 'all') {
+                availableCards = vocabData.filter(item => item.unit === selectedUnit);
+            }
+            
+            cardCountInput.max = availableCards.length;
+            
+            // Adjust current value if it exceeds max
+            if (parseInt(cardCountInput.value) > availableCards.length) {
+                cardCountInput.value = availableCards.length;
+            }
+        }
+
+        // Event Listeners
+        function attachEventListeners() {
+            startBtn.addEventListener('click', startLearning);
+            reviewHardBtn.addEventListener('click', () => startLearning('hard'));
+            reviewFavoritesBtn.addEventListener('click', () => startLearning('favorites'));
+            resetBtn.addEventListener('click', resetProgress);
+            homeBtn.addEventListener('click', goToDashboard);
+            flashcard.addEventListener('click', flipCard);
+            favoriteBtn.addEventListener('click', toggleFavorite);
+            soundBtn.addEventListener('click', pronounceWord);
+            hardBtn.addEventListener('click', markAsHard);
+            easyBtn.addEventListener('click', markAsEasy);
+            prevBtn.addEventListener('click', previousCard);
+            nextBtn.addEventListener('click', nextCard);
+            unitSelect.addEventListener('change', updateCardCountMax);
+
+            // Keyboard navigation
+            document.addEventListener('keydown', handleKeyPress);
+        }
+
+        // Start Learning
+        function startLearning(mode = 'normal') {
+            let filteredData = [...vocabData];
+
+            if (mode === 'hard') {
+                filteredData = vocabData.filter(item => hardWords.includes(item.id));
+                if (filteredData.length === 0) {
+                    showNotification('No hard words saved yet!');
+                    return;
+                }
+            } else if (mode === 'favorites') {
+                filteredData = vocabData.filter(item => favorites.includes(item.id));
+                if (filteredData.length === 0) {
+                    showNotification('No favorites saved yet!');
+                    return;
+                }
+            } else {
+                const selectedUnit = unitSelect.value;
+                if (selectedUnit !== 'all') {
+                    filteredData = filteredData.filter(item => item.unit === selectedUnit);
+                }
+            }
+
+            // Shuffle and limit
+            filteredData = shuffleArray(filteredData);
+            const cardCount = Math.max(1, Math.min(parseInt(cardCountInput.value) || 5, filteredData.length));
+            currentCards = filteredData.slice(0, cardCount);
+
+            if (currentCards.length === 0) {
+                showNotification('No cards available for the selected filters!');
+                return;
+            }
+
+            currentIndex = 0;
+            dashboard.style.display = 'none';
+            learningMode.style.display = 'block';
+            showCard();
+        }
+
+        // Shuffle Array
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Show Card
+        function showCard() {
+            if (currentCards.length === 0) return;
+
+            const card = currentCards[currentIndex];
+            cardWord.textContent = card.word;
+            cardMeaning.textContent = card.meaning;
+            cardExample.textContent = card.example;
+            cardUnit.textContent = card.unit;
+
+            // Update progress
+            progressInfo.textContent = `${currentIndex + 1}/${currentCards.length}`;
+            progressBar.style.width = `${((currentIndex + 1) / currentCards.length) * 100}%`;
+
+            // Update favorite button
+            if (favorites.includes(card.id)) {
+                favoriteBtn.classList.add('active');
+            } else {
+                favoriteBtn.classList.remove('active');
+            }
+
+            // Reset flip
+            flashcard.classList.remove('flipped');
+
+            // Update navigation buttons
+            prevBtn.disabled = currentIndex === 0;
+            nextBtn.disabled = currentIndex === currentCards.length - 1;
+        }
+
+        // Flip Card
+        function flipCard() {
+            flashcard.classList.toggle('flipped');
+        }
+
+        // Toggle Favorite
+        function toggleFavorite() {
+            const card = currentCards[currentIndex];
+            const index = favorites.indexOf(card.id);
+
+            if (index > -1) {
+                favorites.splice(index, 1);
+                favoriteBtn.classList.remove('active');
+            } else {
+                favorites.push(card.id);
+                favoriteBtn.classList.add('active');
+            }
+
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+        }
+
+        // Pronounce Word
+        function pronounceWord() {
+            const card = currentCards[currentIndex];
+            if ('speechSynthesis' in window) {
+                // Cancel any ongoing speech
+                speechSynthesis.cancel();
+                
+                const utterance = new SpeechSynthesisUtterance(card.word);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                
+                // Ensure voices are loaded
+                if (speechSynthesis.getVoices().length === 0) {
+                    speechSynthesis.addEventListener('voiceschanged', () => {
+                        speechSynthesis.speak(utterance);
+                    }, { once: true });
+                } else {
+                    speechSynthesis.speak(utterance);
+                }
+            }
+        }
+
+        // Mark as Hard
+        function markAsHard() {
+            const card = currentCards[currentIndex];
+            if (!hardWords.includes(card.id)) {
+                hardWords.push(card.id);
+                localStorage.setItem('hardWords', JSON.stringify(hardWords));
+            }
+            nextCard();
+        }
+
+        // Mark as Easy
+        function markAsEasy() {
+            const card = currentCards[currentIndex];
+            const index = hardWords.indexOf(card.id);
+            if (index > -1) {
+                hardWords.splice(index, 1);
+                localStorage.setItem('hardWords', JSON.stringify(hardWords));
+            }
+            nextCard();
+        }
+
+        // Previous Card
+        function previousCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                showCard();
+            }
+        }
+
+        // Next Card
+        function nextCard() {
+            if (currentIndex < currentCards.length - 1) {
+                currentIndex++;
+                showCard();
+            } else {
+                // Session complete
+                showNotification('🎉 Great job! You\'ve completed this session!');
+                goToDashboard();
+            }
+        }
+
+        // Handle Key Press
+        function handleKeyPress(e) {
+            if (learningMode.style.display === 'block') {
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        previousCard();
+                        break;
+                    case 'ArrowRight':
+                        nextCard();
+                        break;
+                    case ' ':
+                        e.preventDefault();
+                        flipCard();
+                        break;
+                    case 'f':
+                        toggleFavorite();
+                        break;
+                    case 's':
+                        pronounceWord();
+                        break;
+                }
+            }
+        }
+
+        // Go to Dashboard
+        function goToDashboard() {
+            learningMode.style.display = 'none';
+            dashboard.style.display = 'block';
+        }
+
+        // Reset Progress
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset all progress? This will clear hard words and favorites.')) {
+                hardWords = [];
+                favorites = [];
+                localStorage.removeItem('hardWords');
+                localStorage.removeItem('favorites');
+                showNotification('Progress has been reset!');
+            }
+        }
+
+        // Show Notification
+        function showNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(102, 126, 234, 0.95);
+                color: white;
+                padding: 15px 30px;
+                border-radius: 10px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+                backdrop-filter: blur(10px);
+                z-index: 1000;
+                font-weight: 500;
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'fadeIn 0.3s ease reverse';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Initialize app
+        init();
+    </script>
+</body>
+</html>
